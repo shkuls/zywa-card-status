@@ -1,17 +1,20 @@
 const mongoose = require("mongoose");
 
 const infoSchema = new mongoose.Schema({
+  statusCode : {type : Number , default : 1},
   status: {type : String , default : "No Status"},
   comment:{type : String , default : "None"},
-  timestamp: { type: String, default: "None" }
+  timestamp: { type: String, default: "None"}
 })
 
 const cardSchema = new mongoose.Schema({
-  cardId: { type: String , uniqure : true },
-  phoneNumber: { type: String},
+  cardId: { type: String , unique : true },
+  phoneNumber: { type: String , unique : true},
+  latestStatus :{type : infoSchema},
   info : {
-    type : [infoSchema]
-  },
+    type : [infoSchema],
+    unique: true
+  }
 
 
 });

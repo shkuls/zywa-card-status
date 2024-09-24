@@ -17,13 +17,20 @@ async function readCSVFiles() {
                 const startIndex =file.search("-") + 2;
                 const endIndex = file.search(".csv")
                 const status = file.slice(startIndex, endIndex);
-                
+                let statusCode = 1;
+                if(status === "Returned")
+                  statusCode= 4;
+                else if(status === "Delivered")
+                  statusCode = 3;
+                else if(status === "Delivery exceptions")
+                  statusCode = 2;
+
                 const fileData = [];
                 
                 fs.createReadStream(filePath)
                   .pipe(csv())
                   .on('data', (row) => {
-                    fileData.push({ ...row, status });
+                    fileData.push({ ...row, statusCode , status });
                   })
                   .on('end', () => {
                     CardJSON.push(...fileData); 
