@@ -2,39 +2,43 @@ const cors = require("cors");
 const express = require("express");
 const bodyParser = require("body-parser");
 const rateLimit = require('express-rate-limit');
-const jwt = require('jsonwebtoken');
 const Card = require("./Models/card.model");
-
+const helmet = require('helmet');
 const app = express();
 const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100 // Limit each IP to 100 requests per 15 minutes
+  windowMs: 15 * 60 * 1000,
+  max: 100 // 100 requests/15 minutes for each IP
 });
 app.use(limiter);
 app.use(bodyParser.json());
 app.use(cors());
+app.use(helmet());
 
-app.get("/get_card_status" , (req, res)=>{
-  const input =req.query.input;
-  let phoneNumber;
-  let cardId;
+app.get("/get_card_status", (req, res) => {
+  const input = req.query.data;
 
-  if(input[0] == "Z")
-    cardId = input;
-  else
-    phoneNumber = input;
 
-    console.log(phoneNumber , cardId)
+  if ((input.length == 7 && input.slice(0, 3) == "ZYW") || input.length == 9) {
 
     Card.findOne({
       $or: [
         { cardId: input },
         { phoneNumber: input }
       ]
-    }).then((document)=>{
-      
-      res.send({ID : document.cardId , PhoneNumber : document.phoneNumber  ,LatestStatus : document.latestStatus , History : document.info})
+    }).then((document) => {
+      if (document)
+        res.send({ ID: document.cardId, PhoneNumber: document.phoneNumber, LatestStatus: document.latestStatus, History: document.info })
+      else
+        res.send("No card found.")
     })
+  }
+  else {
+    res.send("Invalid Card ID or Phone Number")
+  }
+
+
+
+
 })
 
 module.exports = app;
